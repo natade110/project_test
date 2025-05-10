@@ -23,10 +23,39 @@ const Dashboard = ({ onSignOut }) => {
       // Use the handler provided by the parent component
       onSignOut();
     } else {
-      // Fallback implementation
-      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
-      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=localhost;";
+      // More thorough cookie clearing approach
+      clearAuthCookies();
       window.location.href = '/signin';
+    }
+  };
+
+  // Function to properly clear auth cookies
+  const clearAuthCookies = () => {
+    // Get all cookies
+    const cookies = document.cookie.split(';');
+    
+    // Find the token cookie to extract its exact parameters
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith('token=')) {
+        // Clear with all possible combinations
+        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+        document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+        document.cookie = "token=; path=/; domain=; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+        
+        // Additional attributes that might have been set
+        document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict;";
+        document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=strict;";
+        document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax;";
+        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict;";
+        
+        // Also try with max-age
+        document.cookie = "token=; path=/; max-age=0;";
+        document.cookie = "token=; path=/; domain=localhost; max-age=0;";
+        
+        console.log("Token cookie cleared with multiple approaches");
+        break;
+      }
     }
   };
 

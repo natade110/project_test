@@ -11,50 +11,60 @@ export default function DashboardPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
-
-  // Function to clear token cookie - defined outside useEffect for reuse
-  const clearTokenCookie = () => {
-    // Multiple clearing methods to ensure it works
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=localhost;";
-    document.cookie = "token=; max-age=-99999999; path=/;";
-    document.cookie = "token=; max-age=0; path=/;";
-    console.log("Token cookie cleared");
+  
+  // Function to handle sign-out using both the API and client-side cookie clearing
+  const handleSignOut = async () => {
+    try {
+      // Clear cookies on client side
+      const clearTokenCookie = () => {
+        // Clear with all possible parameters to ensure it's removed
+        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+        document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+        document.cookie = "token=; path=/; max-age=0;";
+        document.cookie = "token=; path=/; domain=localhost; max-age=0;";
+        document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict;";
+        console.log("Token cookie cleared on client side");
+      };
+      
+      // First, call our API endpoint to clear HTTP-only cookies
+      const response = await fetch('/api/auth/signout', {
+        method: 'POST',
+        credentials: 'include' // Important for cookie operations
+      });
+      
+      if (!response.ok) {
+        console.error('Error signing out via API');
+      } else {
+        console.log('API signout successful');
+      }
+      
+      // Always clear cookies on client side as a backup
+      clearTokenCookie();
+      
+      // Update redux state
+      dispatch(signOut());
+      
+      // Set a flag in localStorage to sync across tabs
+      localStorage.setItem('auth_signout', Date.now().toString());
+      
+      // Force reload the application to ensure clean state
+      if (typeof window !== 'undefined') {
+        window.location.href = '/signin';
+      } else {
+        router.push('/signin');
+      }
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      // Even if there's an error, attempt to redirect
+      router.push('/signin');
+    }
   };
   
-  // Function to get token from cookies
-  const getTokenFromCookies = () => {
-    if (typeof window === 'undefined') return null;
-    
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.startsWith('token=')) {
-        return cookie.substring('token='.length, cookie.length);
-      }
-    }
-    return null;
-  };
-
   useEffect(() => {
     const checkAuth = () => {
-      // Get token from cookies
-      const tokenFromCookies = getTokenFromCookies();
-      
-      console.log("Auth check:", { 
-        isLoggedIn, 
-        reduxToken: token ? 'exists' : 'missing',
-        cookieToken: tokenFromCookies ? 'exists' : 'missing'
-      });
-
       // Check authentication status
-      if (!isLoggedIn && !tokenFromCookies) {
+      if (!isLoggedIn && !document.cookie.includes('token=')) {
         console.log("Not authenticated, redirecting to signin");
-        
-        // Clear the token cookie as a precaution
-        clearTokenCookie();
-        
-        // Use window.location for more reliable redirection
         router.push('/signin');
         return;
       }
@@ -63,22 +73,20 @@ export default function DashboardPage() {
     };
 
     checkAuth();
-  }, [isLoggedIn, token]);
-
-  // Function to handle sign-out that can be passed down to Dashboard
-  const handleSignOut = () => {
-    // Clear the token cookie
-    clearTokenCookie();
     
-    // Update redux state
-    dispatch(signOut());
+    // Listen for storage events to sync logout across tabs
+    const handleStorageChange = (event) => {
+      if (event.key === 'auth_signout') {
+        router.push('/signin');
+      }
+    };
     
-    // Set a flag in localStorage to sync across tabs
-    localStorage.setItem('auth_signout', Date.now().toString());
+    window.addEventListener('storage', handleStorageChange);
     
-    // Use direct location change for more reliable navigation
-    router.push('/signin');
-  };
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [isLoggedIn, token, router]);
 
   if (isLoading) {
     return (

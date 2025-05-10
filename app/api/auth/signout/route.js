@@ -8,14 +8,38 @@ export async function POST() {
       message: 'Signed out successfully' 
     });
     
-    // Delete the auth token cookie
+    // More thorough cookie clearing
+    // Use multiple variations to ensure the cookie is cleared
     response.cookies.set({
       name: 'token',
       value: '',
       path: '/',
+      expires: new Date(0),
       maxAge: 0,
       httpOnly: true,
       sameSite: 'strict',
+    });
+    
+    // Also try without httpOnly to catch cookies that might have been set without it
+    response.cookies.set({
+      name: 'token',
+      value: '',
+      path: '/',
+      expires: new Date(0),
+      maxAge: 0,
+      httpOnly: false,
+      sameSite: 'strict',
+    });
+    
+    // Try with different sameSite values
+    response.cookies.set({
+      name: 'token',
+      value: '',
+      path: '/',
+      expires: new Date(0),
+      maxAge: 0,
+      httpOnly: true,
+      sameSite: 'lax',
     });
     
     return response;
