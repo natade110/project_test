@@ -1,30 +1,28 @@
-// app/api/activity/route.js - Updated with more robust error handling
+// app/api/activity/route.js
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
     console.log('Activity API route called');
     
-    // Add timeout to prevent hanging requests
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
-    
-    const response = await fetch('https://www.boredapi.com/api/activity', {
+    // Direct fetch to the Bored API with better error handling
+    const response = await fetch('https://bored-api.appbrewery.com/random', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      signal: controller.signal,
       // Prevent caching
-      cache: 'no-store'
+      cache: 'no-store',
+      // Add a longer timeout
+      next: { revalidate: 0 }
     });
-    
-    // Clear the timeout
-    clearTimeout(timeoutId);
     
     if (!response.ok) {
       console.error(`Bored API responded with status: ${response.status}`);
-      throw new Error(`Failed to fetch activity: ${response.status}`);
+      return NextResponse.json(
+        { error: `Failed to fetch activity: ${response.status}` },
+        { status: response.status }
+      );
     }
     
     const data = await response.json();
@@ -34,16 +32,8 @@ export async function GET() {
   } catch (error) {
     console.error('Activity API error details:', error);
     
-    // More specific error message based on error type
-    let errorMessage = 'Failed to fetch activity';
-    if (error.name === 'AbortError') {
-      errorMessage = 'Request timeout: Failed to fetch activity in time';
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    
     return NextResponse.json(
-      { error: errorMessage },
+      { error: error.message || 'Failed to fetch activity' },
       { status: 500 }
     );
   }

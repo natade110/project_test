@@ -1,5 +1,5 @@
 // redux/features/authSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 // Helper function to get token from cookies
 const getTokenFromCookies = () => {
@@ -20,17 +20,38 @@ const setTokenInCookies = (token) => {
   if (typeof window === 'undefined') return;
   
   // Set cookie with 1 day expiry
-  document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
+  document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}; SameSite=Strict`;
+};
+
+// Helper function to remove token from cookies
+const removeTokenFromCookies = () => {
+  if (typeof window === 'undefined') return;
+  
+  document.cookie = 'token=; path=/; max-age=0; SameSite=Strict';
 };
 
 // Initialize state with token from cookies if available
 const initialState = {
   user: null,
-  token: typeof window !== 'undefined' ? getTokenFromCookies() : null,
-  isLoggedIn: typeof window !== 'undefined' ? !!getTokenFromCookies() : false,
+  token: null,
+  isLoggedIn: false,
   loading: false,
   error: null,
 };
+
+// A thunk for signing out that handles the cookie removal
+export const signOutAsync = createAsyncThunk(
+  'auth/signOutAsync',
+  async (_, { dispatch }) => {
+    // Clear token cookie
+    removeTokenFromCookies();
+    
+    // Dispatch regular sign out action
+    dispatch(signOut());
+    
+    return { success: true };
+  }
+);
 
 export const authSlice = createSlice({
   name: 'auth',
@@ -49,7 +70,7 @@ export const authSlice = createSlice({
       state.error = null;
     },
     signOut: (state) => {
-      // Clear cookie is handled in the component
+      // Update Redux state only (cookie handling is done in the thunk)
       state.token = null;
       state.user = null;
       state.isLoggedIn = false;
@@ -60,9 +81,15 @@ export const authSlice = createSlice({
     setAuthError: (state, action) => {
       state.error = action.payload;
       state.loading = false;
+    },
+    checkAuth: (state) => {
+      // For client-side auth checking
+      const token = getTokenFromCookies();
+      state.token = token;
+      state.isLoggedIn = !!token;
     }
   }
 });
 
-export const { signIn, signOut, setAuthLoading, setAuthError } = authSlice.actions;
+export const { signIn, signOut, setAuthLoading, setAuthError, checkAuth } = authSlice.actions;
 export default authSlice.reducer;

@@ -1,7 +1,7 @@
-// components/Dashboard.js - Updated with error handling
+// components/Dashboard.js
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchNewActivity, clearActivityError } from '@/redux/features/activitySlice';
+import { fetchNewActivity, clearActivityError, setFallbackActivity } from '@/redux/features/activitySlice';
 import { signOut } from '@/redux/features/authSlice';
 import { useRouter } from 'next/navigation';
 
@@ -10,16 +10,28 @@ const Dashboard = () => {
   const router = useRouter();
   const { activity, loading, error } = useSelector(state => state.activity);
   const { user } = useSelector(state => state.auth);
+  const [retryCount, setRetryCount] = useState(0);
   
   useEffect(() => {
     // Fetch initial activity on mount
     handleGetNewActivity();
   }, []);
 
+  // Effect to switch to fallback activity if retried too many times
+  useEffect(() => {
+    if (retryCount >= 3 && error) {
+      dispatch(setFallbackActivity());
+    }
+  }, [retryCount, error, dispatch]);
+
   const handleGetNewActivity = () => {
     // Clear any existing errors first
     dispatch(clearActivityError());
-    dispatch(fetchNewActivity());
+    dispatch(fetchNewActivity())
+      .unwrap()
+      .catch(() => {
+        setRetryCount(prevCount => prevCount + 1);
+      });
   };
 
   const handleSignOut = () => {
@@ -30,7 +42,10 @@ const Dashboard = () => {
     dispatch(signOut());
     
     // Navigate to sign in page
-    router.push('/signin');
+    // Use a slight delay to ensure the state is updated
+    setTimeout(() => {
+      router.push('/signin');
+    }, 50);
   };
 
   return (
@@ -68,6 +83,14 @@ const Dashboard = () => {
               >
                 Try Again
               </button>
+              {retryCount >= 2 && (
+                <button 
+                  onClick={() => dispatch(setFallbackActivity())}
+                  className="mt-4 ml-4 bg-dark-color text-white py-2 px-4 rounded-md"
+                >
+                  Use Fallback Activity
+                </button>
+              )}
             </div>
           ) : activity ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
