@@ -1,6 +1,6 @@
+// backend/middleware/auth.js
 const jwt = require('jsonwebtoken');
 
-// Middleware to authenticate token
 const auth = (req, res, next) => {
   // Get token from header
   const authHeader = req.header('Authorization');
@@ -10,7 +10,7 @@ const auth = (req, res, next) => {
     return res.status(401).json({ error: 'No token, authorization denied' });
   }
   
-  // Verify token format (Bearer token)
+  // Check format (Bearer token)
   if (!authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Invalid token format' });
   }
@@ -19,12 +19,16 @@ const auth = (req, res, next) => {
   
   try {
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Add user from payload to request
     req.user = decoded;
     next();
   } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token expired' });
+    }
+    
     res.status(401).json({ error: 'Token is not valid' });
   }
 };

@@ -1,7 +1,8 @@
+// redux/features/authSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
-// Check if a token exists in cookies on initial load
-const getInitialToken = () => {
+// Get token from cookies helper
+const getTokenFromCookies = () => {
   if (typeof window !== 'undefined') {
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
@@ -14,10 +15,25 @@ const getInitialToken = () => {
   return null;
 };
 
+// Set token in cookies
+const setTokenInCookies = (token) => {
+  if (typeof window !== 'undefined') {
+    // Set cookie with 1 day expiry
+    document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
+  }
+};
+
+// Remove token from cookies
+const removeTokenFromCookies = () => {
+  if (typeof window !== 'undefined') {
+    document.cookie = 'token=; path=/; max-age=0';
+  }
+};
+
 const initialState = {
   user: null,
-  token: typeof window !== 'undefined' ? getInitialToken() : null,
-  isLoggedIn: typeof window !== 'undefined' ? !!getInitialToken() : false,
+  token: typeof window !== 'undefined' ? getTokenFromCookies() : null,
+  isLoggedIn: typeof window !== 'undefined' ? !!getTokenFromCookies() : false,
   loading: false,
   error: null,
 };
@@ -35,11 +51,17 @@ export const authSlice = createSlice({
       };
       state.token = action.payload.token;
       state.error = null;
+      
+      // Set token in cookies
+      setTokenInCookies(action.payload.token);
     },
     signOut: (state) => {
       state.isLoggedIn = false;
       state.user = null;
       state.token = null;
+      
+      // Remove token from cookies
+      removeTokenFromCookies();
     },
     setAuthError: (state, action) => {
       state.error = action.payload;

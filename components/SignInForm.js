@@ -40,6 +40,7 @@ const SignInForm = () => {
     
     if (validateForm()) {
       try {
+        dispatch(setAuthLoading(true));
         // Call the sign-in API endpoint
         const response = await fetch('/api/auth/signin', {
           method: 'POST',
@@ -52,15 +53,12 @@ const SignInForm = () => {
         const data = await response.json();
 
         if (response.ok) {
-          // Store token in cookies
-          document.cookie = `token=${data.token}; path=/; max-age=${60 * 60 * 24}`; // 1 day
-          
-          // Update Redux state
+          // Update Redux state with token and user info
           dispatch(signIn({
+            token: data.token,
             email: data.email,
             firstName: data.firstName,
-            lastName: data.lastName,
-            token: data.token
+            lastName: data.lastName
           }));
           
           // Navigate to landing page
