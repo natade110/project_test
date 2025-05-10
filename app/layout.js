@@ -10,10 +10,15 @@ const notoSansThai = Noto_Sans_Thai({
   display: 'swap', // Ensures text remains visible during font loading
 });
 
+// Separate viewport export (this is the key change)
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export const metadata = {
   title: 'Authentication System',
   description: 'Full-Stack Software Engineer Interview Project',
-  viewport: 'width=device-width, initial-scale=1',
 };
 
 export default function RootLayout({ children }) {

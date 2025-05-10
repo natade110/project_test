@@ -3,25 +3,52 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 33, 36, 51; /* Your dark color #212433 */
+  --background-rgb: 255, 255, 255; /* White */
+  --primary-color: 11, 218, 165; /* Green #0BDAA5 */
+  --secondary-color: 218, 11, 98; /* Red #DA0B62 */
+  --border-color: 235, 235, 235; /* Border & Placeholder #EBEBEB */
+  --gray-color: 179, 179, 179; /* Gray #B3B3B3 */
 }
 
-@media (prefers-color-scheme: dark) {
+/* Remove dark mode preferences to ensure consistent styling */
+/* @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
   }
-}
+} */
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: rgb(var(--background-rgb));
+  font-family: 'Noto Sans Thai', sans-serif;
+  min-height: 100vh;
+}
+
+/* Add custom box shadow as defined in requirements */
+.shadow-custom {
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.05);
+}
+
+/* Additional helper classes */
+.text-primary {
+  color: rgb(var(--primary-color));
+}
+
+.text-secondary {
+  color: rgb(var(--secondary-color));
+}
+
+.bg-primary {
+  background-color: rgb(var(--primary-color));
+}
+
+.bg-secondary {
+  background-color: rgb(var(--secondary-color));
+}
+
+.border-custom {
+  border-color: rgb(var(--border-color));
 }
