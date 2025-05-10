@@ -7,6 +7,8 @@ const router = express.Router();
 
 // Validation middleware for signup
 const signupValidation = [
+  body('firstName').notEmpty().withMessage('First name is required'),
+  body('lastName').notEmpty().withMessage('Last name is required'),
   body('email')
     .notEmpty().withMessage('Email is required')
     .isEmail().withMessage('Invalid email format'),

@@ -18,10 +18,9 @@ exports.signup = async (req, res) => {
   }
 
   try {
-    const { email, password } = req.body;
-
+    const { firstName, lastName, email, password } = req.body;
     // Check if all required fields are provided
-    if (!email || !password) {
+    if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -46,6 +45,8 @@ exports.signup = async (req, res) => {
 
     // Create new user
     const user = new User({
+      firstName,
+      lastName,
       email,
       password,
       createdAt: new Date(),
@@ -60,6 +61,8 @@ exports.signup = async (req, res) => {
       message: 'User created successfully',
       user: {
         id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         createdAt: user.createdAt
       }
@@ -107,7 +110,9 @@ exports.signin = async (req, res) => {
     const token = jwt.sign(
       {
         userId: user._id,
-        email: user.email
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
       },
       jwtSecret,
       { expiresIn: process.env.JWT_EXPIRY || '1d' }
@@ -123,6 +128,8 @@ exports.signin = async (req, res) => {
     res.status(200).json({
       token,
       email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
       message: 'Login successful'
     });
   } catch (error) {

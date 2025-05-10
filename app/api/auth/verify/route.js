@@ -43,6 +43,9 @@ export async function GET(request) {
     return NextResponse.json({
       isAuthenticated: true,
       user: {
+        email: payload.email,
+        firstName: payload.firstName,
+        lastName: payload.lastName,
         email: payload.email
       }
     });

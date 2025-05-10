@@ -94,7 +94,9 @@ const SignInForm = () => {
           // Update Redux state with token and user info
           dispatch(signIn({
             token: data.token,
-            email: data.email
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName
           }));
           
           // Navigate to landing page
