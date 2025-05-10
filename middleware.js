@@ -1,4 +1,4 @@
-// middleware.js
+// Updated middleware.js to fix token handling
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
@@ -7,12 +7,16 @@ async function verifyToken(token) {
   try {
     if (!token) return null;
     
-    // Use the same secret key as in your backend
+    // Make sure to use the environment variable
     const secretKey = new TextEncoder().encode(
       process.env.JWT_SECRET
     );
     
+    // Add console logging for debugging
+    console.log('Attempting to verify token with secret');
+    
     const { payload } = await jwtVerify(token, secretKey);
+    console.log('Token verified successfully');
     return payload;
   } catch (error) {
     console.error('Token verification error:', error.message);

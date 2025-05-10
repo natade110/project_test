@@ -1,14 +1,14 @@
-// components/Dashboard.js
+// components/Dashboard.js - Updated with error handling
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchNewActivity } from '@/redux/features/activitySlice';
+import { fetchNewActivity, clearActivityError } from '@/redux/features/activitySlice';
 import { signOut } from '@/redux/features/authSlice';
 import { useRouter } from 'next/navigation';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { activity, loading } = useSelector(state => state.activity);
+  const { activity, loading, error } = useSelector(state => state.activity);
   const { user } = useSelector(state => state.auth);
   
   useEffect(() => {
@@ -17,6 +17,8 @@ const Dashboard = () => {
   }, []);
 
   const handleGetNewActivity = () => {
+    // Clear any existing errors first
+    dispatch(clearActivityError());
     dispatch(fetchNewActivity());
   };
 
@@ -57,6 +59,16 @@ const Dashboard = () => {
             <div className="flex justify-center items-center" style={{height: "10rem"}}>
               <div className="loader"></div>
             </div>
+          ) : error ? (
+            <div className="text-center text-secondary py-6">
+              <p>Error: {error}</p>
+              <button 
+                onClick={handleGetNewActivity}
+                className="mt-4 bg-primary text-white py-2 px-4 rounded-md"
+              >
+                Try Again
+              </button>
+            </div>
           ) : activity ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -85,6 +97,7 @@ const Dashboard = () => {
           <button
             onClick={handleGetNewActivity}
             className="bg-primary text-white py-3 px-8 rounded-md text-lg"
+            disabled={loading}
           >
             Get New Activity
           </button>

@@ -1,20 +1,33 @@
-// redux/features/activitySlice.js
+// redux/features/activitySlice.js - Updated version
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchNewActivity = createAsyncThunk(
   'activity/fetchNewActivity',
   async (_, { rejectWithValue }) => {
     try {
-      // Use our proxy API route instead of directly accessing BoredAPI
-      const response = await fetch('/api/activity');
+      console.log('Fetching new activity...');
+      
+      // Use our proxy API route with better error handling
+      const response = await fetch('/api/activity', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Prevent caching issues
+        cache: 'no-cache'
+      });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch activity');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch activity');
       }
       
-      return await response.json();
+      const data = await response.json();
+      console.log('Activity data fetched successfully:', data);
+      return data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      console.error('Error in fetchNewActivity thunk:', error);
+      return rejectWithValue(error.message || 'Failed to fetch activity');
     }
   }
 );
@@ -32,6 +45,9 @@ export const activitySlice = createSlice({
     clearActivity: (state) => {
       state.activity = null;
     },
+    clearActivityError: (state) => {
+      state.error = null;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -42,14 +58,16 @@ export const activitySlice = createSlice({
       .addCase(fetchNewActivity.fulfilled, (state, action) => {
         state.activity = action.payload;
         state.loading = false;
+        state.error = null;
       })
       .addCase(fetchNewActivity.rejected, (state, action) => {
-        state.error = action.payload;
         state.loading = false;
+        state.error = action.payload || 'An unknown error occurred';
+        console.error('Activity fetch rejected:', state.error);
       });
   },
 });
 
-export const { clearActivity } = activitySlice.actions;
+export const { clearActivity, clearActivityError } = activitySlice.actions;
 
 export default activitySlice.reducer;
