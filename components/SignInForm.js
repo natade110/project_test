@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { signIn, setAuthLoading } from '@/redux/features/authSlice';
+import { signIn, setAuthLoading, setAuthError } from '@/redux/features/authSlice';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -9,6 +9,7 @@ const SignInForm = () => {
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -40,7 +41,9 @@ const SignInForm = () => {
     
     if (validateForm()) {
       try {
+        setIsSubmitting(true);
         dispatch(setAuthLoading(true));
+        
         // Call the sign-in API endpoint
         const response = await fetch('/api/auth/signin', {
           method: 'POST',
@@ -51,10 +54,13 @@ const SignInForm = () => {
         });
 
         const data = await response.json();
+        
+        console.log('Sign-in response:', data);
 
-        dispatch(setAuthLoading(false));
-
-        if (response.ok) {
+        if (response.ok && data.token) {
+          // Set token in cookies directly for redundancy
+          document.cookie = `token=${data.token}; path=/; max-age=${60 * 60 * 24}`;
+          
           // Update Redux state with token and user info
           dispatch(signIn({
             token: data.token,
@@ -63,22 +69,29 @@ const SignInForm = () => {
             lastName: data.lastName
           }));
           
-          // Navigate to landing page
-          router.push('/dashboard');
+          // Wait a moment for state to update
+          setTimeout(() => {
+            // Navigate to landing page
+            router.push('/dashboard');
+          }, 100);
         } else {
           // Handle error
-          if (data.error === 'Invalid email') {
+          if (data.error === 'Invalid email' || data.error === 'Invalid username') {
             setEmailError('Invalid username');
           } else if (data.error === 'Invalid password') {
             setPasswordError('Invalid password');
           } else {
             setEmailError(data.error || 'Sign in failed');
           }
+          dispatch(setAuthError(data.error || 'Sign in failed'));
         }
       } catch (error) {
-        dispatch(setAuthLoading(false));
         console.error('Sign in error:', error);
         setEmailError('Sign in failed. Please try again.');
+        dispatch(setAuthError('Sign in failed'));
+      } finally {
+        setIsSubmitting(false);
+        dispatch(setAuthLoading(false));
       }
     }
   };
@@ -119,8 +132,9 @@ const SignInForm = () => {
           <button
             type="submit"
             className="w-full bg-primary text-white py-2 px-4 rounded-md"
+            disabled={isSubmitting}
           >
-            Sign In
+            {isSubmitting ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 

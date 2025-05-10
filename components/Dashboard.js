@@ -8,12 +8,22 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { activity, loading } = useSelector(state => state.activity);
-  const { user } = useSelector(state => state.auth);
+  const { user, isLoggedIn, token } = useSelector(state => state.auth);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    // Check auth status
+    if (!isLoggedIn || !token) {
+      console.log("Not logged in or missing token. Redirecting to signin.");
+      router.push('/signin');
+      return;
+    }
+    
+    setIsLoaded(true);
+    
     // Fetch initial activity when component mounts
     handleGetNewActivity();
-  }, []);
+  }, [isLoggedIn, token]);
 
   const handleGetNewActivity = () => {
     dispatch(fetchNewActivity());
@@ -30,6 +40,14 @@ const Dashboard = () => {
     router.push('/signin');
   };
 
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="loader"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-4xl mx-auto">
@@ -37,6 +55,11 @@ const Dashboard = () => {
           <div>
             <h1 className="text-3xl font-bold">Landing Page</h1>
             <h2 className="text-xl text-gray">Let's find something to do!</h2>
+            {user && (
+              <p className="text-sm text-gray mt-2">
+                Welcome, {user.firstName} {user.lastName}!
+              </p>
+            )}
           </div>
           <button
             onClick={handleSignOut}

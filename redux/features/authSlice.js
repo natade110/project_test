@@ -30,17 +30,23 @@ const removeTokenFromCookies = () => {
   }
 };
 
-const initialState = {
-  user: null,
-  token: typeof window !== 'undefined' ? getTokenFromCookies() : null,
-  isLoggedIn: typeof window !== 'undefined' ? !!getTokenFromCookies() : false,
-  loading: false,
-  error: null,
+// Get initial state safely for SSR
+const getInitialState = () => {
+  const hasWindow = typeof window !== 'undefined';
+  const token = hasWindow ? getTokenFromCookies() : null;
+  
+  return {
+    user: null,
+    token: token,
+    isLoggedIn: !!token,
+    loading: false,
+    error: null,
+  };
 };
 
 export const authSlice = createSlice({
   name: 'auth',
-  initialState,
+  initialState: getInitialState(),
   reducers: {
     signIn: (state, action) => {
       state.isLoggedIn = true;

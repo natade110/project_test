@@ -34,7 +34,20 @@ export async function POST(request) {
       );
     }
     
-    return NextResponse.json(data);
+    // Create the response with token and user data
+    const response = NextResponse.json(data);
+    
+    // Set the token in a cookie as well for redundancy
+    response.cookies.set({
+      name: 'token',
+      value: data.token,
+      httpOnly: true,
+      path: '/',
+      maxAge: 60 * 60 * 24, // 1 day
+      sameSite: 'strict',
+    });
+    
+    return response;
   } catch (error) {
     console.error('Signin error:', error);
     return NextResponse.json(

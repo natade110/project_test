@@ -101,6 +101,9 @@ exports.signin = async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
+    // Get JWT secret from environment or use a fallback (for development only)
+    const jwtSecret = process.env.JWT_SECRET || 'your-secret-key-here';
+
     // Generate JWT token
     const token = jwt.sign(
       {
@@ -109,7 +112,7 @@ exports.signin = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName
       },
-      process.env.JWT_SECRET,
+      jwtSecret,
       { expiresIn: process.env.JWT_EXPIRY || '1d' }
     );
 
@@ -118,6 +121,7 @@ exports.signin = async (req, res) => {
     await user.save();
 
     console.log('User signed in:', user.email);
+    console.log('Generated token:', token.substring(0, 20) + '...');
     
     // Return token and user info
     res.status(200).json({
