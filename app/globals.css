@@ -135,7 +135,7 @@ a {
 }
 
 .max-w-md {
-  max-width: 28rem;
+  max-width: 35rem;
 }
 
 .max-w-4xl {
@@ -156,6 +156,7 @@ a {
 
 .bg-primary {
   background-color: var(--primary-color);
+  border-color: white;
 }
 
 .bg-secondary {
@@ -184,6 +185,13 @@ a {
 
 .text-lg {
   font-size: 1.125rem;
+  padding: 10px;
+  border-radius: 24px;
+  border-color: #ffff;
+}
+
+.no-shadow {
+  box-shadow: none !important;
 }
 
 .text-xl {

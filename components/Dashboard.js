@@ -17,13 +17,11 @@ const Dashboard = ({ onSignOut }) => {
     dispatch(fetchNewActivity());
   };
 
-  // Use the provided signOut handler from parent or fallback to a direct implementation
+  // Use the provided signOut handler from parent
   const handleSignOut = () => {
     if (typeof onSignOut === 'function') {
-      // Use the handler provided by the parent component
       onSignOut();
     } else {
-      // More thorough cookie clearing approach
       clearAuthCookies();
       window.location.href = '/signin';
     }
@@ -31,25 +29,18 @@ const Dashboard = ({ onSignOut }) => {
 
   // Function to properly clear auth cookies
   const clearAuthCookies = () => {
-    // Get all cookies
     const cookies = document.cookie.split(';');
     
-    // Find the token cookie to extract its exact parameters
     for (let i = 0; i < cookies.length; i++) {
       const cookie = cookies[i].trim();
       if (cookie.startsWith('token=')) {
-        // Clear with all possible combinations
         document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
         document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
         document.cookie = "token=; path=/; domain=; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
-        
-        // Additional attributes that might have been set
         document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict;";
         document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=strict;";
         document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax;";
         document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict;";
-        
-        // Also try with max-age
         document.cookie = "token=; path=/; max-age=0;";
         document.cookie = "token=; path=/; domain=localhost; max-age=0;";
         
@@ -60,72 +51,74 @@ const Dashboard = ({ onSignOut }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Landing Page</h1>
-            <h2 className="text-xl text-gray">Let's find something to do!</h2>
-            {user && (
-              <p className="text-sm text-gray mt-2">
-                Welcome, {user.firstName} {user.lastName}!
-              </p>
-            )}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-custom p-6">
+        <div className="text-center mb-5">
+          <h1 className="text-2xl font-bold">Landing Page</h1>
+          <h2 className="text-lg text-gray">Let's find something to do!</h2>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center py-10">
+            <div className="loader"></div>
           </div>
+        ) : error ? (
+          <div className="text-center text-secondary py-4">
+            <p>Error: {error}</p>
+            <button 
+              onClick={handleGetNewActivity}
+              className="mt-4 bg-primary text-white py-2 px-4 rounded-md"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : activity ? (
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <div className="grid grid-cols-2 gap-3">
+            <div style={{ paddingTop: '15px' }}>
+              <h3 className="text-sm font-bold text-gray">Activity:</h3>
+              <p>{activity.activity}</p>
+            </div>
+            <div style={{ paddingTop: '15px' }}>
+              <h3 className="text-sm font-bold text-gray">Type:</h3>
+              <p>{activity.type}</p>
+            </div>
+            <div style={{ paddingTop: '15px' }}>
+              <h3 className="text-sm font-bold text-gray">Participant:</h3>
+              <p>{activity.participants}</p>
+            </div>
+            <div style={{ paddingTop: '15px' }}>
+              <h3 className="text-sm font-bold text-gray">Budget:</h3>
+              <p>${activity.price || '0.00'}</p>
+            </div>
+            </div>
+          </div>
+        ) : (
+          <p className="text-center text-gray py-6">No activity found. Try getting a new one!</p>
+        )}
+
+        <button
+          onClick={handleGetNewActivity}
+          className="w-full bg-primary text-white py-3 px-4 rounded-full text-lg mb-4"
+          style={{ boxShadow: 'none' }}
+          disabled={loading}
+        >
+          Get New Activity
+        </button>
+
+        <div className="text-center">
           <button
             onClick={handleSignOut}
-            className="bg-secondary text-white py-2 px-6 rounded-md"
+            style={{
+              background: 'none',
+              boxShadow: 'none',
+              border: 'none',
+              color: 'red',
+              padding: '5px',
+              cursor: 'pointer'
+            }}
           >
             Sign Out
-          </button>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-custom p-8 mb-8">
-          {loading ? (
-            <div className="flex justify-center items-center" style={{height: "10rem"}}>
-              <div className="loader"></div>
-            </div>
-          ) : error ? (
-            <div className="text-center text-secondary py-6">
-              <p>Error: {error}</p>
-              <button 
-                onClick={handleGetNewActivity}
-                className="mt-4 bg-primary text-white py-2 px-4 rounded-md"
-              >
-                Try Again
-              </button>
-            </div>
-          ) : activity ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-sm font-bold text-gray mb-1">Activity Name</h3>
-                <p className="text-lg">{activity.activity}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-gray mb-1">Type</h3>
-                <p className="text-lg">{activity.type}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-gray mb-1">Participants</h3>
-                <p className="text-lg">{activity.participants}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-gray mb-1">Budget in USD</h3>
-                <p className="text-lg">${activity.price || '0'}</p>
-              </div>
-            </div>
-          ) : (
-            <p className="text-center text-gray py-10">No activity found. Try getting a new one!</p>
-          )}
-        </div>
-
-        <div className="flex justify-center">
-          <button
-            onClick={handleGetNewActivity}
-            className="bg-primary text-white py-3 px-8 rounded-md text-lg"
-            disabled={loading}
-          >
-            Get New Activity
           </button>
         </div>
       </div>
