@@ -1,6 +1,96 @@
-module.exports = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+/**
+ * Sign up a new user
+ * @param {Object} userData - User data including firstName, lastName, email, and password
+ * @returns {Promise} Response from the API
+ */
+export const signUpUser = async (userData) => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Sign up API error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Sign in a user
+ * @param {Object} credentials - User credentials including email and password
+ * @returns {Promise} Response from the API with token and user info
+ */
+export const signInUser = async (credentials) => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/signin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Sign in API error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get a new activity from the Bored API
+ * @returns {Promise} Response with activity data
+ */
+export const getActivity = async () => {
+  try {
+    const response = await fetch('https://www.boredapi.com/api/activity');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch activity');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Activity API error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get user profile
+ * @param {string} token - Authentication token
+ * @returns {Promise} Response with user profile data
+ */
+export const getUserProfile = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/api/user/profile`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Get profile API error:', error);
+    throw error;
+  }
+};
+
+// Export the API service
+const apiService = {
+  signUpUser,
+  signInUser,
+  getActivity,
+  getUserProfile,
+};
+
+export default apiService;
