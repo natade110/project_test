@@ -1,3 +1,4 @@
+// backend/controllers/authController.js
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
@@ -121,7 +122,6 @@ exports.signin = async (req, res) => {
     await user.save();
 
     console.log('User signed in:', user.email);
-    console.log('Generated token:', token.substring(0, 20) + '...');
     
     // Return token and user info
     res.status(200).json({

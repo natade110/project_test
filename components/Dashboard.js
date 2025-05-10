@@ -1,3 +1,4 @@
+// components/Dashboard.js
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchNewActivity } from '@/redux/features/activitySlice';
@@ -8,22 +9,12 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { activity, loading } = useSelector(state => state.activity);
-  const { user, isLoggedIn, token } = useSelector(state => state.auth);
-  const [isLoaded, setIsLoaded] = useState(false);
-
+  const { user } = useSelector(state => state.auth);
+  
   useEffect(() => {
-    // Check auth status
-    if (!isLoggedIn || !token) {
-      console.log("Not logged in or missing token. Redirecting to signin.");
-      router.push('/signin');
-      return;
-    }
-    
-    setIsLoaded(true);
-    
-    // Fetch initial activity when component mounts
+    // Fetch initial activity on mount
     handleGetNewActivity();
-  }, [isLoggedIn, token]);
+  }, []);
 
   const handleGetNewActivity = () => {
     dispatch(fetchNewActivity());
@@ -39,14 +30,6 @@ const Dashboard = () => {
     // Navigate to sign in page
     router.push('/signin');
   };
-
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <div className="loader"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white p-6">
@@ -94,7 +77,7 @@ const Dashboard = () => {
               </div>
             </div>
           ) : (
-            <p className="text-center text-gray">No activity found. Try getting a new one!</p>
+            <p className="text-center text-gray py-10">No activity found. Try getting a new one!</p>
           )}
         </div>
 

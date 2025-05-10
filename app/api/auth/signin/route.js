@@ -1,3 +1,4 @@
+// app/api/auth/signin/route.js
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
@@ -25,8 +26,10 @@ export async function POST(request) {
       }),
     });
     
+    // Get response data
     const data = await backendResponse.json();
     
+    // Handle unsuccessful response
     if (!backendResponse.ok) {
       return NextResponse.json(
         { error: data.error || 'Failed to sign in' },
@@ -34,10 +37,16 @@ export async function POST(request) {
       );
     }
     
-    // Create the response with token and user data
-    const response = NextResponse.json(data);
+    // Create successful response with user data and token
+    const response = NextResponse.json({
+      token: data.token,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      message: 'Login successful'
+    });
     
-    // Set the token in a cookie as well for redundancy
+    // Set the token in a HTTP-only cookie for better security
     response.cookies.set({
       name: 'token',
       value: data.token,

@@ -1,15 +1,18 @@
+// redux/features/activitySlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchNewActivity = createAsyncThunk(
   'activity/fetchNewActivity',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('https://www.boredapi.com/api/activity');
+      // Use our proxy API route instead of directly accessing BoredAPI
+      const response = await fetch('/api/activity');
+      
       if (!response.ok) {
         throw new Error('Failed to fetch activity');
       }
-      const data = await response.json();
-      return data;
+      
+      return await response.json();
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -37,12 +40,12 @@ export const activitySlice = createSlice({
         state.error = null;
       })
       .addCase(fetchNewActivity.fulfilled, (state, action) => {
-        state.loading = false;
         state.activity = action.payload;
+        state.loading = false;
       })
       .addCase(fetchNewActivity.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload;
+        state.loading = false;
       });
   },
 });

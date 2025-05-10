@@ -9,7 +9,7 @@ async function verifyToken(token) {
     
     // Use the same secret key as in your backend
     const secretKey = new TextEncoder().encode(
-      process.env.JWT_SECRET || 'your-secret-key-here' // Fallback for development
+      process.env.JWT_SECRET
     );
     
     const { payload } = await jwtVerify(token, secretKey);
@@ -26,20 +26,15 @@ export async function middleware(request) {
   // Get token from cookies
   const token = request.cookies.get('token')?.value;
   
-  // For debugging
-  console.log(`Middleware: Path ${pathname}, Token exists: ${!!token}`);
-  
   // Protected routes - require authentication
   if (pathname.startsWith('/dashboard')) {
     if (!token) {
-      console.log('No token found, redirecting to signin');
       return NextResponse.redirect(new URL('/signin', request.url));
     }
     
     // Verify token validity
     const payload = await verifyToken(token);
     if (!payload) {
-      console.log('Invalid token, redirecting to signin');
       // Clear invalid token and redirect to signin
       const response = NextResponse.redirect(new URL('/signin', request.url));
       response.cookies.delete('token');
@@ -55,12 +50,10 @@ export async function middleware(request) {
     // Verify token before redirecting
     const payload = await verifyToken(token);
     if (payload) {
-      console.log('Valid token found, redirecting to dashboard');
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     
     // Token is invalid, clear it
-    console.log('Invalid token found on auth route, clearing token');
     const response = NextResponse.next();
     response.cookies.delete('token');
     return response;

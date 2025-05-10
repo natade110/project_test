@@ -1,3 +1,4 @@
+// components/SignInForm.js
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { signIn, setAuthLoading, setAuthError } from '@/redux/features/authSlice';
@@ -16,21 +17,20 @@ const SignInForm = () => {
   const validateForm = () => {
     let isValid = true;
 
+    // Reset errors
+    setEmailError('');
+    setPasswordError('');
+
     // Email validation
     if (!email.trim()) {
       setEmailError('Invalid username');
       isValid = false;
-    } else {
-      setEmailError('');
     }
 
     // Password validation
-    if (password.length < 6 || !/\d/.test(password) || 
-        !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !password.trim()) {
+    if (!password.trim()) {
       setPasswordError('Invalid password');
       isValid = false;
-    } else {
-      setPasswordError('');
     }
 
     return isValid;
@@ -58,7 +58,7 @@ const SignInForm = () => {
         console.log('Sign-in response:', data);
 
         if (response.ok && data.token) {
-          // Set token in cookies directly for redundancy
+          // Set token in cookies directly
           document.cookie = `token=${data.token}; path=/; max-age=${60 * 60 * 24}`;
           
           // Update Redux state with token and user info
@@ -69,16 +69,12 @@ const SignInForm = () => {
             lastName: data.lastName
           }));
           
-          // Wait a moment for state to update
-          setTimeout(() => {
-            // Navigate to landing page
-            router.push('/dashboard');
-          }, 100);
+          // Navigate to landing page
+          router.push('/dashboard');
         } else {
           // Handle error
-          if (data.error === 'Invalid email' || data.error === 'Invalid username') {
+          if (data.error === 'Invalid email or password') {
             setEmailError('Invalid username');
-          } else if (data.error === 'Invalid password') {
             setPasswordError('Invalid password');
           } else {
             setEmailError(data.error || 'Sign in failed');
