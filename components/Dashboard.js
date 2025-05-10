@@ -1,51 +1,33 @@
 // components/Dashboard.js
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchNewActivity, clearActivityError, setFallbackActivity } from '@/redux/features/activitySlice';
-import { signOut } from '@/redux/features/authSlice';
-import { useRouter } from 'next/navigation';
+import { fetchNewActivity } from '@/redux/features/activitySlice';
 
-const Dashboard = () => {
+const Dashboard = ({ onSignOut }) => {
   const dispatch = useDispatch();
-  const router = useRouter();
   const { activity, loading, error } = useSelector(state => state.activity);
   const { user } = useSelector(state => state.auth);
-  const [retryCount, setRetryCount] = useState(0);
   
   useEffect(() => {
     // Fetch initial activity on mount
     handleGetNewActivity();
   }, []);
 
-  // Effect to switch to fallback activity if retried too many times
-  useEffect(() => {
-    if (retryCount >= 3 && error) {
-      dispatch(setFallbackActivity());
-    }
-  }, [retryCount, error, dispatch]);
-
   const handleGetNewActivity = () => {
-    // Clear any existing errors first
-    dispatch(clearActivityError());
-    dispatch(fetchNewActivity())
-      .unwrap()
-      .catch(() => {
-        setRetryCount(prevCount => prevCount + 1);
-      });
+    dispatch(fetchNewActivity());
   };
 
+  // Use the provided signOut handler from parent or fallback to a direct implementation
   const handleSignOut = () => {
-    // Clear token from cookies
-    document.cookie = 'token=; path=/; max-age=0';
-    
-    // Update Redux state
-    dispatch(signOut());
-    
-    // Navigate to sign in page
-    // Use a slight delay to ensure the state is updated
-    setTimeout(() => {
-      router.push('/signin');
-    }, 50);
+    if (typeof onSignOut === 'function') {
+      // Use the handler provided by the parent component
+      onSignOut();
+    } else {
+      // Fallback implementation
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=localhost;";
+      window.location.href = '/signin';
+    }
   };
 
   return (
@@ -83,14 +65,6 @@ const Dashboard = () => {
               >
                 Try Again
               </button>
-              {retryCount >= 2 && (
-                <button 
-                  onClick={() => dispatch(setFallbackActivity())}
-                  className="mt-4 ml-4 bg-dark-color text-white py-2 px-4 rounded-md"
-                >
-                  Use Fallback Activity
-                </button>
-              )}
             </div>
           ) : activity ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

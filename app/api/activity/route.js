@@ -3,18 +3,15 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    console.log('Activity API route called');
+    console.log('Activity API route called - using proxy to avoid CORS');
     
-    // Direct fetch to the Bored API with better error handling
+    // Instead of direct frontend calls, proxy through our backend to avoid CORS
     const response = await fetch('https://bored-api.appbrewery.com/random', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Prevent caching
       cache: 'no-store',
-      // Add a longer timeout
-      next: { revalidate: 0 }
     });
     
     if (!response.ok) {
@@ -26,11 +23,11 @@ export async function GET() {
     }
     
     const data = await response.json();
-    console.log('Activity data fetched successfully:', data);
+    console.log('Activity data fetched successfully through proxy:', data);
     
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Activity API error details:', error);
+    console.error('Activity API proxy error:', error);
     
     return NextResponse.json(
       { error: error.message || 'Failed to fetch activity' },
