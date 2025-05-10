@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import Dashboard from '@/components/Dashboard';
-import { signOut } from '@/redux/features/authSlice';
+import { signOut, checkAuth } from '@/redux/features/authSlice';
 
 export default function DashboardPage() {
-  const { isLoggedIn, token } = useSelector(state => state.auth);
+  const { isLoggedIn, token, loading: authLoading } = useSelector(state => state.auth);
   const router = useRouter();
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
@@ -17,26 +17,15 @@ export default function DashboardPage() {
     try {
       // Clear cookies on client side
       const clearTokenCookie = () => {
-        // Clear with all possible parameters to ensure it's removed
         document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
-        document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
         document.cookie = "token=; path=/; max-age=0;";
-        document.cookie = "token=; path=/; domain=localhost; max-age=0;";
-        document.cookie = "token=; path=/; domain=localhost; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict;";
-        console.log("Token cookie cleared on client side");
       };
       
       // First, call our API endpoint to clear HTTP-only cookies
       const response = await fetch('/api/auth/signout', {
         method: 'POST',
-        credentials: 'include' // Important for cookie operations
+        credentials: 'include'
       });
-      
-      if (!response.ok) {
-        console.error('Error signing out via API');
-      } else {
-        console.log('API signout successful');
-      }
       
       // Always clear cookies on client side as a backup
       clearTokenCookie();
@@ -48,11 +37,7 @@ export default function DashboardPage() {
       localStorage.setItem('auth_signout', Date.now().toString());
       
       // Force reload the application to ensure clean state
-      if (typeof window !== 'undefined') {
-        window.location.href = '/signin';
-      } else {
-        router.push('/signin');
-      }
+      window.location.href = '/signin';
     } catch (error) {
       console.error('Error during sign out:', error);
       // Even if there's an error, attempt to redirect
@@ -61,33 +46,31 @@ export default function DashboardPage() {
   };
   
   useEffect(() => {
-    const checkAuth = () => {
-      // Check authentication status
-      if (!isLoggedIn && !document.cookie.includes('token=')) {
-        console.log("Not authenticated, redirecting to signin");
-        router.push('/signin');
-        return;
-      }
-      
+    // Important: This will check auth status on mount and after refresh
+    dispatch(checkAuth());
+
+    // Set a timeout to prevent infinite loading state
+    const timeout = setTimeout(() => {
       setIsLoading(false);
-    };
-
-    checkAuth();
+    }, 2000); // 2 seconds timeout as fallback
     
-    // Listen for storage events to sync logout across tabs
-    const handleStorageChange = (event) => {
-      if (event.key === 'auth_signout') {
+    return () => clearTimeout(timeout);
+  }, [dispatch]);
+  
+  // This effect runs when auth state changes
+  useEffect(() => {
+    if (!authLoading) {
+      if (!isLoggedIn) {
+        // If auth check is complete and user is not logged in, redirect
         router.push('/signin');
+      } else {
+        // Auth check is complete and user is logged in
+        setIsLoading(false);
       }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [isLoggedIn, token, router]);
+    }
+  }, [isLoggedIn, authLoading, router]);
 
+  // If still loading, show loading spinner
   if (isLoading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
