@@ -68,11 +68,11 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     signIn: (state, action) => {
-      const { token, email, firstName, lastName } = action.payload;
+      const { token, email} = action.payload;
       
       // Update state
       state.token = token;
-      state.user = { email, firstName, lastName };
+      state.user = { email};
       state.isLoggedIn = true;
       state.error = null;
       state.loading = false;

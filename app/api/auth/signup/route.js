@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { firstName, lastName, email, password } = body;
+    const {email, password } = body;
     
     // Validate mandatory fields
-    if (!firstName || !lastName || !email || !password) {
+    if (!email || !password) {
       return NextResponse.json(
         { error: 'All fields are mandatory' },
         { status: 400 }
@@ -39,8 +39,6 @@ export async function POST(request) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        firstName,
-        lastName,
         email,
         password,
       }),

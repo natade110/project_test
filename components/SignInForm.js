@@ -14,6 +14,32 @@ const SignInForm = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
+  // Validate email format
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Validate password complexity
+  const validatePassword = (password) => {
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters long';
+    }
+    if (!/[A-Z]/.test(password)) {
+      return 'Password must contain at least 1 uppercase letter';
+    }
+    if (!/[a-z]/.test(password)) {
+      return 'Password must contain at least 1 lowercase letter';
+    }
+    if (!/\d/.test(password)) {
+      return 'Password must contain at least 1 number';
+    }
+    if (!/[!@#$%^&*]/.test(password)) {
+      return 'Password must contain at least 1 special character';
+    }
+    return '';
+  };
+
   const validateForm = () => {
     let isValid = true;
 
@@ -25,11 +51,15 @@ const SignInForm = () => {
     if (!email.trim()) {
       setEmailError('Invalid username');
       isValid = false;
+    } else if (!isValidEmail(email)) {
+      setEmailError('Invalid email format');
+      isValid = false;
     }
 
     // Password validation
     if (!password.trim()) {
-      setPasswordError('Invalid password');
+      
+      setPasswordError('Invalid password 22');
       isValid = false;
     }
 
@@ -64,9 +94,7 @@ const SignInForm = () => {
           // Update Redux state with token and user info
           dispatch(signIn({
             token: data.token,
-            email: data.email,
-            firstName: data.firstName,
-            lastName: data.lastName
+            email: data.email
           }));
           
           // Navigate to landing page
@@ -74,9 +102,17 @@ const SignInForm = () => {
         } else {
           // Handle error
           if (data.error === 'Invalid email or password') {
-            setEmailError('Invalid username');
-            setPasswordError('Invalid password');
+            // Check if email format is valid before showing error
+            if (isValidEmail(email)) {
+              // If email is valid format, just show password error
+              setPasswordError('Invalid password');
+            } else {
+              // If email format is invalid, show both errors
+              setEmailError('Invalid username');
+              setPasswordError('Invalid password');
+            }
           } else {
+            // For other server errors
             setEmailError(data.error || 'Sign in failed');
           }
           dispatch(setAuthError(data.error || 'Sign in failed'));

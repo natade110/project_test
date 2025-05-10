@@ -10,7 +10,7 @@ const authHeader = (token) => {
 
 /**
  * Sign up a new user
- * @param {Object} userData - User data including firstName, lastName, email, and password
+ * @param {Object} userData - User data including email, and password
  * @returns {Promise} Response from the API
  */
 export const signUpUser = async (userData) => {

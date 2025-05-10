@@ -198,7 +198,7 @@ The test suite includes tests for:
 
 ### Authentication
 - **POST /api/auth/signup** - Register a new user
-  - Required fields: firstName, lastName, email, password
+  - Required fields: email, password
 - **POST /api/auth/signin** - Authenticate a user
   - Required fields: email, password
 

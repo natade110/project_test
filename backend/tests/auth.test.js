@@ -27,8 +27,6 @@ afterEach(async () => {
 describe('Auth API', () => {
   // Test user data
   const testUser = {
-    firstName: 'John',
-    lastName: 'Doe',
     email: 'john.doe@example.com',
     password: 'Password123!',
   };
@@ -65,8 +63,6 @@ describe('Auth API', () => {
       const res = await request(app)
         .post('/api/auth/signup')
         .send({
-          firstName: testUser.firstName,
-          lastName: testUser.lastName,
           // email is missing
           password: testUser.password,
         });
@@ -108,8 +104,7 @@ describe('Auth API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty('token');
       expect(res.body).toHaveProperty('email', testUser.email);
-      expect(res.body).toHaveProperty('firstName', testUser.firstName);
-      expect(res.body).toHaveProperty('lastName', testUser.lastName);
+
     });
 
     it('should return error with invalid credentials', async () => {
