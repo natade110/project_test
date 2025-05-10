@@ -1,24 +1,25 @@
 import './globals.css';
-import { Inter, Noto_Sans_Thai } from 'next/font/google';
+import { Noto_Sans_Thai } from 'next/font/google';
 import { ReduxProvider } from '@/redux/provider';
 
-// Load fonts
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+// Load Noto Sans Thai font with all required weights
 const notoSansThai = Noto_Sans_Thai({ 
-  subsets: ['thai', 'latin'], 
+  subsets: ['thai', 'latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-noto-sans-thai'
+  variable: '--font-noto-sans-thai',
+  display: 'swap', // Ensures text remains visible during font loading
 });
 
 export const metadata = {
   title: 'Authentication System',
   description: 'Full-Stack Software Engineer Interview Project',
+  viewport: 'width=device-width, initial-scale=1',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${notoSansThai.variable} font-noto-sans-thai`}>
+    <html lang="en" className={notoSansThai.variable}>
+      <body className="font-noto-sans-thai bg-white min-h-screen">
         <ReduxProvider>
           {children}
         </ReduxProvider>

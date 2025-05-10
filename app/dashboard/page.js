@@ -1,3 +1,5 @@
+"use client";
+
 import Dashboard from '@/components/Dashboard';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';

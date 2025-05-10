@@ -1,3 +1,5 @@
+"use client";
+
 import SignInForm from '@/components/SignInForm';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
