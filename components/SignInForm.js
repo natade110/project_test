@@ -100,7 +100,7 @@ const SignInForm = () => {
         
         <form onSubmit={handleSignIn}>
           <div className="mb-6">
-            <label htmlFor="email" className="block text-sm font-bold mb-1">Email</label>
+            <label htmlFor="email" className="block text-sm font-bold mb-1">Email <span className="text-secondary">*</span></label>
             <input
               type="email"
               id="email"
@@ -113,7 +113,7 @@ const SignInForm = () => {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-bold mb-1">Password</label>
+            <label htmlFor="password" className="block text-sm font-bold mb-1">Password <span className="text-secondary">*</span></label>
             <input
               type="password"
               id="password"

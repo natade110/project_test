@@ -136,3 +136,35 @@ exports.signin = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+// Sign out controller
+exports.signout = async (req, res) => {
+  try {
+    // Get user from token (attached by auth middleware)
+    const userId = req.user.userId;
+    
+    // Find user by ID
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Optional: You can add any additional logout logic here
+    // For example, updating the lastSeen timestamp
+    user.lastSeen = new Date();
+    await user.save();
+    
+    console.log('User signed out:', user.email);
+    
+    // Return success message
+    // Note: The actual token invalidation happens client-side by removing the token
+    res.status(200).json({ 
+      message: 'Signed out successfully',
+      timestamp: new Date()
+    });
+  } catch (error) {
+    console.error('Signout error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
