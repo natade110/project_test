@@ -10,7 +10,7 @@ const notoSansThai = Noto_Sans_Thai({
   display: 'swap', // Ensures text remains visible during font loading
 });
 
-// Separate viewport export (this is the key change)
+// Separate viewport export
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -24,7 +24,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={notoSansThai.variable}>
-      <body className="font-noto-sans-thai bg-white min-h-screen">
+      <body className={notoSansThai.className}>
         <ReduxProvider>
           {children}
         </ReduxProvider>

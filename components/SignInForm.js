@@ -84,47 +84,47 @@ const SignInForm = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold mb-2 text-black text-center">Welcome Back!</h1>
-        <h2 className="text-lg text-center mb-8 text-gray-600">Sign in to your account to continue</h2>
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-custom">
+        <h1 className="text-3xl font-bold mb-2 text-center">Welcome Back!</h1>
+        <h2 className="text-lg text-center mb-8 text-gray">Sign in to your account to continue</h2>
         
         <form onSubmit={handleSignIn}>
           <div className="mb-6">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="email" className="block text-sm font-bold mb-1">Email</label>
             <input
               type="email"
               id="email"
               placeholder="Email"
-              className={`w-full px-4 py-2 border ${emailError ? 'border-[#DA0B62]' : 'border-[#EBEBEB]'} rounded-md focus:outline-none focus:ring-2 focus:ring-[#0BDAA5]`}
+              className={emailError ? 'error' : ''}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            {emailError && <p className="mt-1 text-[#DA0B62] text-sm">{emailError}</p>}
+            {emailError && <p className="mt-1 text-secondary text-sm">{emailError}</p>}
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label htmlFor="password" className="block text-sm font-bold mb-1">Password</label>
             <input
               type="password"
               id="password"
               placeholder="Password"
-              className={`w-full px-4 py-2 border ${passwordError ? 'border-[#DA0B62]' : 'border-[#EBEBEB]'} rounded-md focus:outline-none focus:ring-2 focus:ring-[#0BDAA5]`}
+              className={passwordError ? 'error' : ''}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            {passwordError && <p className="mt-1 text-[#DA0B62] text-sm">{passwordError}</p>}
+            {passwordError && <p className="mt-1 text-secondary text-sm">{passwordError}</p>}
           </div>
 
           <button
             type="submit"
-            className="w-full bg-[#0BDAA5] text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors"
+            className="w-full bg-primary text-white py-2 px-4 rounded-md"
           >
             Sign In
           </button>
         </form>
 
         <div className="mt-6 text-center">
-          <Link href="/signup" className="text-[#0BDAA5] hover:underline">
+          <Link href="/signup" className="text-primary">
             New User? Sign up!
           </Link>
         </div>
