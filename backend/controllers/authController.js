@@ -73,8 +73,6 @@ exports.signup = async (req, res) => {
   }
 };
 
-const jwt = require('jsonwebtoken');
-
 // Sign in controller
 exports.signin = async (req, res) => {
   // Check validation errors
@@ -103,8 +101,6 @@ exports.signin = async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-
-
     // Generate JWT token
     const token = jwt.sign(
       {
@@ -117,11 +113,12 @@ exports.signin = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRY || '1d' }
     );
 
-      // Update last login timestamp
-      user.lastLogin = new Date();
-      await user.save();
-    
+    // Update last login timestamp
+    user.lastLogin = new Date();
+    await user.save();
 
+    console.log('User signed in:', user.email);
+    
     // Return token and user info
     res.status(200).json({
       token,

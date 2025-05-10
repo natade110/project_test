@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { signIn } from '@/redux/features/authSlice';
+import { signIn, setAuthLoading } from '@/redux/features/authSlice';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -52,6 +52,8 @@ const SignInForm = () => {
 
         const data = await response.json();
 
+        dispatch(setAuthLoading(false));
+
         if (response.ok) {
           // Update Redux state with token and user info
           dispatch(signIn({
@@ -74,6 +76,7 @@ const SignInForm = () => {
           }
         }
       } catch (error) {
+        dispatch(setAuthLoading(false));
         console.error('Sign in error:', error);
         setEmailError('Sign in failed. Please try again.');
       }

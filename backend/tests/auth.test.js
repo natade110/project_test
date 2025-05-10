@@ -5,7 +5,7 @@ const User = require('../models/User');
 
 // Connect to test database before running tests
 beforeAll(async () => {
-  const mongoUri = process.env.MONGODB_TEST_URI || 'mongodb://localhost:27017/auth-system-test';
+  const mongoUri = process.env.MONGODB_TEST_URI;
   await mongoose.connect(mongoUri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
