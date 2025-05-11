@@ -5,12 +5,16 @@ import { useRouter } from 'next/navigation';
 
 const SignUpForm = () => {
   const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
   
   const [errors, setErrors] = useState({
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -44,10 +48,24 @@ const SignUpForm = () => {
   const validateForm = () => {
     let isValid = true;
     const newErrors = {
+      firstName: '',
+      lastName: '',
       email: '',
       password: '',
       confirmPassword: ''
     };
+
+            // First Name validation
+        if (!formData.firstName.trim()) {
+          newErrors.firstName = 'First name is required';
+          isValid = false;
+        }
+    
+        // Last Name validation
+        if (!formData.lastName.trim()) {
+          newErrors.lastName = 'Last name is required';
+          isValid = false;
+        }
 
     // Email validation
     if (!formData.email.trim()) {
@@ -80,7 +98,10 @@ const SignUpForm = () => {
     }
 
     // Confirm Password validation
-    if (formData.password !== formData.confirmPassword) {
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Invalid confirm password';
+      isValid = false;
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Invalid confirm password';
       isValid = false;
     }
@@ -101,6 +122,8 @@ const SignUpForm = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
             email: formData.email,
             password: formData.password
           }),
@@ -111,6 +134,8 @@ const SignUpForm = () => {
         if (response.ok) {
           // Show user input in console
           console.log({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
             email: formData.email,
             password: '********' // Don't log actual password
           });
@@ -141,6 +166,35 @@ const SignUpForm = () => {
         <h1 className="text-3xl font-bold mb-6 text-center">Sign Up</h1>
         
         <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-bold mb-1">First Name <span className="text-secondary">*</span></label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                placeholder="First Name"
+                className={errors.firstName ? 'error' : ''}
+                value={formData.firstName}
+                onChange={handleChange}
+              />
+              {errors.firstName && <p className="mt-1 text-secondary text-sm">{errors.firstName}</p>}
+            </div>
+            
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-bold mb-1">Last Name <span className="text-secondary">*</span></label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                placeholder="Last Name"
+                className={errors.lastName ? 'error' : ''}
+                value={formData.lastName}
+                onChange={handleChange}
+              />
+              {errors.lastName && <p className="mt-1 text-secondary text-sm">{errors.lastName}</p>}
+            </div>
+          </div>
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-bold mb-1">
               Email <span className="text-secondary">*</span>
