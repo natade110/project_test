@@ -1,23 +1,23 @@
+// components/SignUpForm.js
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 const SignUpForm = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
   
   const [errors, setErrors] = useState({
-    firstName: '',
-    lastName: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const router = useRouter();
 
@@ -29,27 +29,25 @@ const SignUpForm = () => {
     });
   };
 
+  // Toggle password visibility
+  const togglePasswordVisibility = (e) => {
+    e.preventDefault(); // Prevent form submission
+    setShowPassword(!showPassword);
+  };
+
+  // Toggle confirm password visibility
+  const toggleConfirmPasswordVisibility = (e) => {
+    e.preventDefault(); // Prevent form submission
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   const validateForm = () => {
     let isValid = true;
     const newErrors = {
-      firstName: '',
-      lastName: '',
       email: '',
       password: '',
       confirmPassword: ''
     };
-
-        // First Name validation
-        if (!formData.firstName.trim()) {
-          newErrors.firstName = 'First name is required';
-          isValid = false;
-        }
-    
-        // Last Name validation
-        if (!formData.lastName.trim()) {
-          newErrors.lastName = 'Last name is required';
-          isValid = false;
-        }
 
     // Email validation
     if (!formData.email.trim()) {
@@ -103,8 +101,6 @@ const SignUpForm = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
             email: formData.email,
             password: formData.password
           }),
@@ -115,8 +111,6 @@ const SignUpForm = () => {
         if (response.ok) {
           // Show user input in console
           console.log({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
             email: formData.email,
             password: '********' // Don't log actual password
           });
@@ -147,37 +141,10 @@ const SignUpForm = () => {
         <h1 className="text-3xl font-bold mb-6 text-center">Sign Up</h1>
         
         <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-bold mb-1">First Name</label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                placeholder="First Name"
-                className={errors.firstName ? 'error' : ''}
-                value={formData.firstName}
-                onChange={handleChange}
-              />
-              {errors.firstName && <p className="mt-1 text-secondary text-sm">{errors.firstName}</p>}
-            </div>
-            
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-bold mb-1">Last Name</label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                placeholder="Last Name"
-                className={errors.lastName ? 'error' : ''}
-                value={formData.lastName}
-                onChange={handleChange}
-              />
-              {errors.lastName && <p className="mt-1 text-secondary text-sm">{errors.lastName}</p>}
-            </div>
-          </div>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-bold mb-1">Email <span className="text-secondary">*</span></label>
+            <label htmlFor="email" className="block text-sm font-bold mb-1">
+              Email <span className="text-secondary">*</span>
+            </label>
             <input
               type="email"
               id="email"
@@ -191,30 +158,108 @@ const SignUpForm = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-bold mb-1">Password <span className="text-secondary">*</span></label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Password"
-              className={errors.password ? 'error' : ''}
-              value={formData.password}
-              onChange={handleChange}
-            />
+            <label htmlFor="password" className="block text-sm font-bold mb-1">
+              Password <span className="text-secondary">*</span>
+            </label>
+            
+            {/* Password Input with Eye Icon */}
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                placeholder="Password"
+                className={errors.password ? 'error w-full' : 'w-full'}
+                value={formData.password}
+                onChange={handleChange}
+                style={{ paddingRight: '40px' }}
+              />
+              
+              {/* Absolutely positioned eye icon */}
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '5px',
+                  boxShadow: 'none'
+                }}
+              >
+                {showPassword ? (
+                  // Eye-off icon (password visible)
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  // Eye icon (password hidden)
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            
             {errors.password && <p className="mt-1 text-secondary text-sm">{errors.password}</p>}
           </div>
 
           <div className="mb-6">
-            <label htmlFor="confirmPassword" className="block text-sm font-bold mb-1">Confirm Password <span className="text-secondary">*</span></label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              placeholder="Confirm Password"
-              className={errors.confirmPassword ? 'error' : ''}
-              value={formData.confirmPassword}
-              onChange={handleChange}
-            />
+            <label htmlFor="confirmPassword" className="block text-sm font-bold mb-1">
+              Confirm Password <span className="text-secondary">*</span>
+            </label>
+            
+            {/* Confirm Password Input with Eye Icon */}
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                className={errors.confirmPassword ? 'error w-full' : 'w-full'}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                style={{ paddingRight: '40px' }}
+              />
+              
+              {/* Absolutely positioned eye icon */}
+              <button
+                type="button"
+                onClick={toggleConfirmPasswordVisibility}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '5px',
+                  boxShadow: 'none'
+                }}
+              >
+                {showConfirmPassword ? (
+                  // Eye-off icon (password visible)
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  // Eye icon (password hidden)
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            
             {errors.confirmPassword && <p className="mt-1 text-secondary text-sm">{errors.confirmPassword}</p>}
           </div>
 

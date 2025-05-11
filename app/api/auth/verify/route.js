@@ -9,7 +9,7 @@ async function verifyJWT(token) {
   try {
     // Get the secret key
     const secretKey = new TextEncoder().encode(
-      process.env.JWT_SECRET || 'your-secret-key-here'
+      process.env.JWT_SECRET
     );
     
     // Verify the token

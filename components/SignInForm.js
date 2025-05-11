@@ -11,6 +11,7 @@ const SignInForm = () => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -20,8 +21,17 @@ const SignInForm = () => {
     return emailRegex.test(email);
   };
 
+  // Toggle password visibility
+  const togglePasswordVisibility = (e) => {
+    e.preventDefault(); // Prevent form submission
+    setShowPassword(!showPassword);
+  };
+
   // Validate password complexity
   const validatePassword = (password) => {
+    if (!password.trim()) {
+      return 'Password is required';
+    }
     if (password.length < 8) {
       return 'Password must be at least 8 characters long';
     }
@@ -58,8 +68,14 @@ const SignInForm = () => {
 
     // Password validation
     if (!password.trim()) {
-      
-      setPasswordError('Invalid password 22');
+      setPasswordError('Invalid password');
+      isValid = false;
+    }
+
+    // Password validation format
+    const passwordValidationError = validatePassword(password);
+    if (passwordValidationError) {
+      setPasswordError('Invalid password : ' + passwordValidationError);
       isValid = false;
     }
 
@@ -94,9 +110,7 @@ const SignInForm = () => {
           // Update Redux state with token and user info
           dispatch(signIn({
             token: data.token,
-            email: data.email,
-            firstName: data.firstName,
-            lastName: data.lastName
+            email: data.email
           }));
           
           // Navigate to landing page
@@ -138,7 +152,9 @@ const SignInForm = () => {
         
         <form onSubmit={handleSignIn}>
           <div className="mb-6">
-            <label htmlFor="email" className="block text-sm font-bold mb-1">Email <span className="text-secondary">*</span></label>
+            <label htmlFor="email" className="block text-sm font-bold mb-1">
+              Email <span className="text-secondary">*</span>
+            </label>
             <input
               type="email"
               id="email"
@@ -151,15 +167,54 @@ const SignInForm = () => {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-bold mb-1">Password <span className="text-secondary">*</span></label>
-            <input
-              type="password"
-              id="password"
-              placeholder="Password"
-              className={passwordError ? 'error' : ''}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <label htmlFor="password" className="block text-sm font-bold mb-1">
+              Password <span className="text-secondary">*</span>
+            </label>
+            
+            {/* Password Input with Eye Icon */}
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                placeholder="Password"
+                className={passwordError ? 'error w-full' : 'w-full'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ paddingRight: '40px' }}
+              />
+              
+              {/* Absolutely positioned eye icon */}
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '5px',
+                  boxShadow: 'none'
+                }}
+              >
+                {showPassword ? (
+                  // Eye-off icon (password visible)
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  // Eye icon (password hidden)
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            
             {passwordError && <p className="mt-1 text-secondary text-sm">{passwordError}</p>}
           </div>
 
